@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartalogue</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="Home.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    backgroundColor: {
+                        "bLack": '#121212',
+                        "gray": '#2b2b2b',
+                        "yellow":'#fcaf3b '
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+   
+    </style>
+</head>
+<body class="bg-gray text-white font-sans">
+  <nav class="bg-black p-4 flex justify-between items-center fixed top-0 w-full z-50">
+    <a href="#">
+        <img class="w-64" src="./images/log.avif" alt="Cartalogue Logo">
+    </a>
+    <ul class="hidden md:flex space-x-6 mr-20">
+        <li><a href="./Home.html" class="hover:underline active:underline text-white active:text-gray-500">Home</a></li>
+        <li><a href="./men.html" class="hover:underline active:underline text-white active:text-gray-500">Men's Watches</a></li>
+        <li><a href="./women.html" class="hover:underline active:underline text-white active:text-gray-500">Women's Watches</a></li>
+        <li><a href="./catalogy.html" class="hover:underline active:underline text-white active:text-gray-500">Catalogue</a></li>
+        <li><a href="./contect.html" class="hover:underline active:underline text-white active:text-gray-500">Contact</a></li>
+    </ul>
+  
+    <div class="md:hidden flex items-center">
+        <button class="menu-toggle text-white focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+<ul class="md:hidden bg-gray-800 space-y-7 mt-24 p-4 hidden">
+    <li><a href="./Home.html" class="block text-white hover:underline active:underline active:text-gray-500">Home</a></li>
+    <li><a href="./men.html" class="block text-white hover:underline active:underline active:text-gray-500">Men's Watches</a></li>
+    <li><a href="./women.html" class="block text-white hover:underline active:underline active:text-gray-500">Women's Watches</a></li>
+    <li><a href="./catalogy.html" class="block text-white hover:underline active:underline active:text-gray-500">Catalogue</a></li>
+    <li><a href="./contect.html" class="block text-white hover:underline active:underline active:text-gray-500">Contact</a></li>
+</ul>
+
+<script>
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mobileMenu = document.querySelector('ul.md\\:hidden');
+
+    menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+</script>
+<div class="container mx-auto mt-8 p-4 bg-black text-white">
+    <h2 class="text-2xl font-bold mb-4">Your Cart</h2>
+    <div id="cart-items"></div>
+    <div class="mt-4">
+        <p id="total-price" class="text-xl font-bold"></p>
+    </div>
+</div>
+
+<script>
+    function displayCartItems() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const cartItemsContainer = document.getElementById('cart-items');
+        cartItemsContainer.innerHTML = ''; // Clear previous content
+
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+        } else {
+            cart.forEach((product, index) => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add(
+                    'bg-gray-800', 'rounded-lg', 'shadow-lg', 'mb-4', 'p-4', 
+                    'flex', 'flex-col', 'md:flex-row', 'justify-between', 'items-center'
+                );
+
+                cartItem.innerHTML = `
+                    <div class="flex items-center">
+                        <img src="${product.imgSrc}" alt="${product.alt}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="ml-4 flex flex-col text-center md:text-left">
+                            <h3 class="text-white font-semibold">${product.title}</h3>
+                            <p class="text-gray-400 text-sm">${product.brand}</p>
+                            <p class="text-white font-bold mt-1">Rs.${product.salePrice}.00 PKR</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center mt-4 md:mt-0 md:ml-4 space-x-2">
+                        <button onclick="updateQuantity(${index}, -1)" class="bg-gray-600 text-white px-3 py-1 rounded-full">-</button>
+                        <span class="text-white font-semibold">${product.quantity}</span>
+                        <button onclick="updateQuantity(${index}, 1)" class="bg-gray-600 text-white px-3 py-1 rounded-full">+</button>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="mt-4 md:mt-0 md:ml-4 bg-yellow text-white px-4 py-2 rounded-lg">Remove</button>
+                `;
+
+                cartItemsContainer.appendChild(cartItem);
+            });
+
+            updateTotalPrice();
+        }
+    }
+
+    function updateQuantity(index, change) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart[index].quantity += change;
+
+        if (cart[index].quantity <= 0) {
+            cart.splice(index, 1); // Remove item if quantity is 0 or less
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        displayCartItems();
+    }
+
+    function removeFromCart(index) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart.splice(index, 1);
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        displayCartItems();
+    }
+
+    function updateTotalPrice() {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let totalPrice = 0;
+
+        cart.forEach(product => {
+            totalPrice += product.salePrice * product.quantity;
+        });
+
+        document.getElementById('total-price').textContent = `Total Price: Rs.${totalPrice}.00 PKR`;
+    }
+
+    // Display the cart items on page load
+    displayCartItems();
+</script>
+
+    </script>
+    
+    </script>
+</body>
+</html>
